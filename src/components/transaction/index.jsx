@@ -87,7 +87,7 @@ export const TransactionComponent = ({ transactions, onDelete, onEdit }) => {
           </div>
         ))
       ) : (
-        <div className="content">No transactions!</div>
+        <h4 style={{ color: "gray", margin: "20px 20px" }}>No transactions!</h4>
       )}
       <PaginationComponent
         totalPages={Math.ceil(totalItems / itemsPerPage)}

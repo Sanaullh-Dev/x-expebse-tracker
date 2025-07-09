@@ -4,7 +4,10 @@ const BalanceCard = ({ type, balance, onAddClick }) => {
   return (
     <div className="cardBox">
       <h4 style={{ color: "white" }}>
-        {type === "expense" ? "Expense" : "Wallet Balance"}: ${balance}
+        {type === "expense" ? "Expense" : "Wallet Balance"}:{" "}
+        <span style={{ color: type === "expense" ? "orange" : "green" }}>
+          ${balance}
+        </span>
       </h4>
       <button
         type="button"

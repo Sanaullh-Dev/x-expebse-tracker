@@ -37,7 +37,23 @@ export const ExpensesBarChart = ({ data }) => {
   useEffect(() => {
     setChartData(getChartData());
   }, [data, getChartData]);
-
+  if (data.length === 0) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "300px",
+          backgroundColor: "white",
+          color: "gray",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        No data available
+      </div>
+    );
+  }
   return (
     <div style={{ width: "100%", height: "300px", backgroundColor: "white" }}>
       <ResponsiveContainer width="100%" height="100%">
