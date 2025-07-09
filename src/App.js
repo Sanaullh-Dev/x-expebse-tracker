@@ -1,115 +1,129 @@
+import { useEffect, useState } from "react";
 import "./App.css";
+import { AddBalancePopup, AddExpensePopup } from "./components/popup";
+import BalanceCard from "./components/card/balanceCard";
+import {
+  deleteExpense,
+  getExpenses,
+  getExpensesTotal,
+  getWalletBalance,
+  updateExpense,
+} from "./until/data.service";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import { ExpensesBarChart } from "./components/chart/expensesBarChart";
+import { PieChartComponent } from "./components/chart/pieChart";
+import { ModalComponent } from "./components/modal";
+import { TransactionComponent } from "./components/transaction";
 
 function App() {
+  const [showIncomePopup, setShowIncomePopup] = useState(false);
+  const [showExpensePopup, setShowExpensePopup] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [editTransaction, setEditTransaction] = useState(null);
+
+  // Fetch transactions from the API or local storage
+  const fetchTransactions = async () => {
+    const data = await getExpenses();
+    setTransactions(data);
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+    setWalletBalance(getWalletBalance());
+  }, []);
+
+  const handleDeleteTransaction = (id) => {
+    const updatedTransactions = transactions.filter(
+      (transaction) => transaction.id !== id
+    );
+    setTransactions(updatedTransactions);
+    deleteExpense(id);
+    fetchTransactions();
+    setWalletBalance(getWalletBalance());
+  };
+
+  const handleEditTransaction = (id, transaction) => {
+    setEditTransaction(transaction);
+    setShowExpensePopup(true);
+    setShowIncomePopup(false);
+    fetchTransactions();
+    setWalletBalance(getWalletBalance());
+  };
+
   return (
-    <div className="App">
-      <h1 style={{ color: "white" }}>Expense Tracker</h1>
-      <div
-        className="container"
-        style={{
-          display: "flex",
-          gap: "20px",
-          backgroundColor: "#aeafae",
-          padding: "20px",
-          borderRadius: "10px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "gray",
-            padding: "50px 15px",
-            borderRadius: "10px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "250px",
-            minWidth: "250px",
+    <div className="App" id="App">
+      <SnackbarProvider autoHideDuration={5000} />
+      <h1 style={{ color: "white", fontSize: "1.5rem" }}>Expense Tracker</h1>
+      <div className="container">
+        <BalanceCard
+          type="wallet"
+          balance={walletBalance}
+          onAddClick={() => {
+            setShowIncomePopup(true);
+            setShowExpensePopup(false);
           }}
-        >
-          <h4 style={{ color: "white" }}>
-            Wallet Balance: <span style={{ color: "greenyellow" }}>$50000</span>
-          </h4>
-          <button
-            style={{
-              padding: "10px 20px",
-              borderRadius: "10px",
-              border: "none",
-              background:
-                "linear-gradient(to right,rgb(174, 175, 174),rgb(61, 158, 66))",
-              color: "white",
-            }}
-          >
-            + Add Income
-          </button>
-        </div>
-        <div
-          style={{
-            backgroundColor: "gray",
-            padding: "50px 15px",
-            borderRadius: "10px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "250px",
-            minWidth: "250px",
+        />
+        <BalanceCard
+          type="expense"
+          balance={getExpensesTotal()}
+          onAddClick={() => {
+            if (getWalletBalance() <= 0) {
+              enqueueSnackbar({
+                message: "You don't have enough balance to add expenses!",
+                variant: "error",
+              });
+              return;
+            }
+            setShowExpensePopup(true);
+            setShowIncomePopup(false);
           }}
-        >
-          <h4 style={{ color: "white" }}>
-            Expense : <span style={{ color: "orange" }}>$50000</span>
-          </h4>
-          <button
-            style={{
-              padding: "10px 20px",
-              borderRadius: "10px",
-              border: "none",
-              background:
-                "linear-gradient(to right, rgb(232, 59, 56), rgb(172, 7, 7))",
-              color: "white",
-            }}
-          >
-            + Add Expense
-          </button>
-        </div>
+        />
+        <PieChartComponent data={transactions} />
       </div>
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          gap: "20px",
-          marginTop: "20px",
-        }}
-      >
-        <div>
-          <h3>Recent Transactions</h3>
-          <div
-            style={{
-              color: "black",
-              backgroundColor: "white",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              width: "100%",
-            }}
-          >
-            No transactions!
-          </div>
+      <div className="details">
+        <div style={{ flex: 1 }}>
+          <h2>Recent Transactions</h2>
+          <TransactionComponent
+            transactions={transactions}
+            onDelete={handleDeleteTransaction}
+            onEdit={handleEditTransaction}
+          />
         </div>
-        <div>
-          <h3>Top Expenses</h3>
-          <div
-            style={{
-              color: "black",
-              backgroundColor: "white",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              width: "100%",
-            }}
-          >
-            No transactions!
+        <div style={{ flex: 1, marginTop: "20px" }}>
+          <h2>Top Expenses</h2>
+          <div>
+            <ExpensesBarChart data={transactions} />
           </div>
         </div>
       </div>
+      <ModalComponent isOpen={showIncomePopup} overlayClassName="overlay">
+        <AddBalancePopup
+          setShowPopup={setShowIncomePopup}
+          addedBalance={() => {
+            setWalletBalance(getWalletBalance());
+            fetchTransactions();
+          }}
+        />
+      </ModalComponent>
+      <ModalComponent isOpen={showExpensePopup} overlayClassName="overlay">
+        <AddExpensePopup
+          setShowPopup={setShowExpensePopup}
+          newExpenseAdded={() => {
+            setWalletBalance(getWalletBalance());
+            fetchTransactions();
+            setEditTransaction(null);
+          }}
+          updateExpense={(id, updatedData) => {
+            updateExpense(id, updatedData);
+            setEditTransaction(null);
+            fetchTransactions();
+            setWalletBalance(getWalletBalance());
+          }}
+          editTransaction={editTransaction}
+          setEditTransaction={setEditTransaction}
+        />
+      </ModalComponent>
     </div>
   );
 }

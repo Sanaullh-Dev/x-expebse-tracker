@@ -1,0 +1,70 @@
+.transactionList {
+  padding: 5px;
+  border-radius: 15px;
+  width: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 310px;
+}
+
+.transactionCard {
+  display: flex;
+  align-items: center;
+  padding: 3px 15px;
+  border-bottom: 1px solid lightgray;
+  margin: 0px;
+  width: 95%;
+  padding-right: 15px;
+}
+
+.transactionIcon {
+  border-radius: 100%;
+  background-color: gainsboro;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.transactionActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transactionAmount {
+  color: orange;
+  font-size: 21px;
+}
+
+.tranBtnContainer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tranDeleteBtn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tranEditBtn {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
